@@ -1,4 +1,4 @@
-# Copyright 1999-2018 Gentoo Foundation
+# Copyright 1999-2019 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=6
@@ -49,11 +49,15 @@ RDEPEND="
 DEPEND="${RDEPEND}
 	dev-qt/qttest:5
 	virtual/pkgconfig
+	sys-devel/autoconf-archive
 "
 
 REQUIRED_USE="|| ( jack pulseaudio portaudio )"
 
-PATCHES=( "${FILESDIR}/notest.patch" )
+PATCHES=(
+	"${FILESDIR}/notest.patch"
+	"${FILESDIR}/${P}-qt-5.11.patch"
+)
 
 sv_disable_opt() {
 	einfo "Disabling $1"
@@ -74,6 +78,12 @@ src_prepare() {
 	use portaudio || sv_disable_opt portaudio
 	use pulseaudio || sv_disable_opt libpulse
 
+	# capnproto 0.7 requires c++14 now
+	sed -e 's/AX_CXX_COMPILE_STDCXX_11/AX_CXX_COMPILE_STDCXX_14/g' \
+		-i configure.ac \
+		-i */configure.ac \
+		|| die
+
 	eautoreconf
 
 	# Those need to be regenerated as they must match current capnproto version
@@ -89,6 +99,10 @@ src_configure() {
 	export QMAKE="$(qt5_get_bindir)"/qmake
 	econf
 	eqmake5 -r sonic-visualiser.pro
+	sed -e 's/std=gnu++11/std=gnu++14/g' \
+		-i Makefile.* \
+		-i checker/Makefile.* \
+		|| die
 }
 
 src_test() {

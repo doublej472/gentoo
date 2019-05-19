@@ -1,17 +1,20 @@
-# Copyright 1999-2018 Gentoo Foundation
+# Copyright 2011-2019 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
-EAPI=6
+EAPI=7
 
 if [[ ${PV} == 9999 ]]; then
 	EGIT_REPO_URI="https://github.com/systemd/systemd.git"
 	inherit git-r3
 else
-	SRC_URI="https://github.com/systemd/systemd/archive/v${PV}/${P}.tar.gz"
+	MY_PV=${PV/_/-}
+	MY_P=${PN}-${MY_PV}
+	S=${WORKDIR}/${MY_P}
+	SRC_URI="https://github.com/systemd/systemd/archive/v${MY_PV}/${MY_P}.tar.gz"
 	KEYWORDS="~alpha ~amd64 ~arm ~arm64 ~hppa ~ia64 ~mips ~ppc ~ppc64 ~sparc ~x86"
 fi
 
-PYTHON_COMPAT=( python{3_5,3_6} )
+PYTHON_COMPAT=( python{3_5,3_6,3_7} )
 
 inherit bash-completion-r1 linux-info meson multilib-minimal ninja-utils pam python-any-r1 systemd toolchain-funcs udev user
 
@@ -20,7 +23,7 @@ HOMEPAGE="https://www.freedesktop.org/wiki/Software/systemd"
 
 LICENSE="GPL-2 LGPL-2.1 MIT public-domain"
 SLOT="0/2"
-IUSE="acl apparmor audit build cryptsetup curl elfutils +gcrypt gnuefi http idn importd +kmod libidn2 +lz4 lzma nat pam pcre policykit qrcode +resolvconf +seccomp selinux +split-usr ssl +sysv-utils test vanilla xkb"
+IUSE="acl apparmor audit build cryptsetup curl dns-over-tls elfutils +gcrypt gnuefi gnutls http idn importd +kmod libidn2 +lz4 lzma nat pam pcre policykit qrcode +resolvconf +seccomp selinux +split-usr +sysv-utils test vanilla xkb"
 
 REQUIRED_USE="importd? ( curl gcrypt lzma )"
 RESTRICT="!test? ( test )"
@@ -35,11 +38,15 @@ COMMON_DEPEND=">=sys-apps/util-linux-2.30:0=[${MULTILIB_USEDEP}]
 	audit? ( >=sys-process/audit-2:0= )
 	cryptsetup? ( >=sys-fs/cryptsetup-1.6:0= )
 	curl? ( net-misc/curl:0= )
+	dns-over-tls? (
+		gnutls? ( >=net-libs/gnutls-3.5.3:0= )
+		!gnutls? ( >=dev-libs/openssl-1.1.0:0= )
+	)
 	elfutils? ( >=dev-libs/elfutils-0.158:0= )
 	gcrypt? ( >=dev-libs/libgcrypt-1.4.5:0=[${MULTILIB_USEDEP}] )
 	http? (
 		>=net-libs/libmicrohttpd-0.9.33:0=
-		ssl? ( >=net-libs/gnutls-3.1.4:0= )
+		gnutls? ( >=net-libs/gnutls-3.1.4:0= )
 	)
 	idn? (
 		libidn2? ( net-dns/libidn2:= )
@@ -85,15 +92,19 @@ PDEPEND=">=sys-apps/dbus-1.9.8[systemd]
 	!vanilla? ( sys-apps/gentoo-systemd-integration )"
 
 # Newer linux-headers needed by ia64, bug #480218
-DEPEND="${COMMON_DEPEND}
+DEPEND="
+	>=sys-kernel/linux-headers-${MINKV}
+	gnuefi? ( >=sys-boot/gnu-efi-3.0.2 )
+"
+
+BDEPEND="
 	app-arch/xz-utils:0
 	dev-util/gperf
 	>=dev-util/meson-0.46
 	>=dev-util/intltool-0.50
 	>=sys-apps/coreutils-8.16
-	>=sys-kernel/linux-headers-${MINKV}
-	virtual/pkgconfig
-	gnuefi? ( >=sys-boot/gnu-efi-3.0.2 )
+	sys-devel/m4
+	virtual/pkgconfig[${MULTILIB_USEDEP}]
 	test? ( sys-apps/dbus )
 	app-text/docbook-xml-dtd:4.2
 	app-text/docbook-xml-dtd:4.5
@@ -104,6 +115,11 @@ DEPEND="${COMMON_DEPEND}
 
 pkg_pretend() {
 	if [[ ${MERGE_TYPE} != buildonly ]]; then
+		if use test && has pid-sandbox ${FEATURES}; then
+			ewarn "Tests are known to fail with PID sandboxing enabled."
+			ewarn "See https://bugs.gentoo.org/674458."
+		fi
+
 		local CONFIG_CHECK="~AUTOFS4_FS ~BLK_DEV_BSG ~CGROUPS
 			~CHECKPOINT_RESTORE ~DEVTMPFS ~EPOLL ~FANOTIFY ~FHANDLE
 			~INOTIFY_USER ~IPV6 ~NET ~NET_NS ~PROC_FS ~SIGNALFD ~SYSFS
@@ -161,7 +177,7 @@ src_prepare() {
 			"${FILESDIR}/gentoo-Dont-enable-audit-by-default.patch"
 			"${FILESDIR}/gentoo-systemd-user-pam.patch"
 			"${FILESDIR}/gentoo-uucp-group-r1.patch"
-			"${FILESDIR}/gentoo-generator-path.patch"
+			"${FILESDIR}/gentoo-generator-path-r1.patch"
 		)
 	fi
 
@@ -222,9 +238,9 @@ multilib_src_configure() {
 		-Delfutils=$(meson_multilib_native_use elfutils)
 		-Dgcrypt=$(meson_use gcrypt)
 		-Dgnu-efi=$(meson_multilib_native_use gnuefi)
+		-Dgnutls=$(meson_multilib_native_use gnutls)
 		-Defi-libdir="${EPREFIX}/usr/$(get_libdir)"
 		-Dmicrohttpd=$(meson_multilib_native_use http)
-		$(usex http -Dgnutls=$(meson_multilib_native_use ssl) -Dgnutls=false)
 		-Dimportd=$(meson_multilib_native_use importd)
 		-Dbzip2=$(meson_multilib_native_use importd)
 		-Dzlib=$(meson_multilib_native_use importd)
@@ -238,7 +254,6 @@ multilib_src_configure() {
 		-Dqrencode=$(meson_multilib_native_use qrcode)
 		-Dseccomp=$(meson_multilib_native_use seccomp)
 		-Dselinux=$(meson_multilib_native_use selinux)
-		#-Dtests=$(meson_multilib_native_use test)
 		-Ddbus=$(meson_multilib_native_use test)
 		-Dxkbcommon=$(meson_multilib_native_use xkb)
 		# hardcode a few paths to spare some deps
@@ -282,6 +297,15 @@ multilib_src_configure() {
 		)
 	fi
 
+	if multilib_is_native_abi && use dns-over-tls; then
+		myconf+=(
+			-Ddns-over-tls=true
+			-Dopenssl=$(usex !gnutls true false)
+		)
+	else
+		myconf+=( -Ddns-over-tls=false -Dopenssl=false )
+	fi
+
 	meson_src_configure "${myconf[@]}"
 }
 
@@ -302,23 +326,23 @@ multilib_src_install_all() {
 	local rootprefix=$(usex split-usr '' /usr)
 
 	# meson doesn't know about docdir
-	mv "${ED%/}"/usr/share/doc/{systemd,${PF}} || die
+	mv "${ED}"/usr/share/doc/{systemd,${PF}} || die
 
 	einstalldocs
 	dodoc "${FILESDIR}"/nsswitch.conf
 
 	if ! use resolvconf; then
-		rm -f "${ED%/}${rootprefix}"/sbin/resolvconf || die
+		rm -f "${ED}${rootprefix}"/sbin/resolvconf || die
 	fi
 
 	if ! use sysv-utils; then
-		rm "${ED%/}${rootprefix}"/sbin/{halt,init,poweroff,reboot,runlevel,shutdown,telinit} || die
-		rm "${ED%/}"/usr/share/man/man1/init.1 || die
-		rm "${ED%/}"/usr/share/man/man8/{halt,poweroff,reboot,runlevel,shutdown,telinit}.8 || die
+		rm "${ED}${rootprefix}"/sbin/{halt,init,poweroff,reboot,runlevel,shutdown,telinit} || die
+		rm "${ED}"/usr/share/man/man1/init.1 || die
+		rm "${ED}"/usr/share/man/man8/{halt,poweroff,reboot,runlevel,shutdown,telinit}.8 || die
 	fi
 
 	if ! use resolvconf && ! use sysv-utils; then
-		rmdir "${ED%/}${rootprefix}"/sbin || die
+		rmdir "${ED}${rootprefix}"/sbin || die
 	fi
 
 	# Preserve empty dirs in /etc & /var, bug #437008
@@ -330,20 +354,10 @@ multilib_src_install_all() {
 	# Symlink /etc/sysctl.conf for easy migration.
 	dosym ../sysctl.conf /etc/sysctl.d/99-sysctl.conf
 
-	# If we install these symlinks, there is no way for the sysadmin to remove them
-	# permanently.
-	rm -f "${ED%/}"/etc/systemd/system/multi-user.target.wants/systemd-networkd.service || die
-	rm -f "${ED%/}"/etc/systemd/system/dbus-org.freedesktop.network1.service || die
-	rm -f "${ED%/}"/etc/systemd/system/multi-user.target.wants/systemd-resolved.service || die
-	rm -f "${ED%/}"/etc/systemd/system/dbus-org.freedesktop.resolve1.service || die
-	rm -fr "${ED%/}"/etc/systemd/system/network-online.target.wants || die
-	rm -fr "${ED%/}"/etc/systemd/system/sockets.target.wants || die
-	rm -fr "${ED%/}"/etc/systemd/system/sysinit.target.wants || die
-
 	local udevdir=/lib/udev
 	use split-usr || udevdir=/usr/lib/udev
 
-	rm -r "${ED%/}${udevdir}/hwdb.d" || die
+	rm -r "${ED}${udevdir}/hwdb.d" || die
 
 	if use split-usr; then
 		# Avoid breaking boot/reboot
@@ -353,9 +367,9 @@ multilib_src_install_all() {
 }
 
 migrate_locale() {
-	local envd_locale_def="${EROOT%/}/etc/env.d/02locale"
-	local envd_locale=( "${EROOT%/}"/etc/env.d/??locale )
-	local locale_conf="${EROOT%/}/etc/locale.conf"
+	local envd_locale_def="${EROOT}/etc/env.d/02locale"
+	local envd_locale=( "${EROOT}"/etc/env.d/??locale )
+	local locale_conf="${EROOT}/etc/locale.conf"
 
 	if [[ ! -L ${locale_conf} && ! -e ${locale_conf} ]]; then
 		# If locale.conf does not exist...
@@ -396,6 +410,20 @@ migrate_locale() {
 	fi
 }
 
+save_enabled_units() {
+	ENABLED_UNITS=()
+	type systemctl &>/dev/null || return
+	for x; do
+		if systemctl --quiet --root="${ROOT:-/}" is-enabled "${x}"; then
+			ENABLED_UNITS+=( "${x}" )
+		fi
+	done
+}
+
+pkg_preinst() {
+	save_enabled_units {machines,remote-{cryptsetup,fs}}.target getty@tty1.service
+}
+
 pkg_postinst() {
 	newusergroup() {
 		enewgroup "$1"
@@ -420,7 +448,7 @@ pkg_postinst() {
 	# Keep this here in case the database format changes so it gets updated
 	# when required. Despite that this file is owned by sys-apps/hwids.
 	if has_version "sys-apps/hwids[udev]"; then
-		udevadm hwdb --update --root="${EROOT%/}"
+		udevadm hwdb --update --root="${EROOT}"
 	fi
 
 	udev_reload || FAIL=1
@@ -430,6 +458,20 @@ pkg_postinst() {
 	migrate_locale
 
 	systemd_reenable systemd-networkd.service systemd-resolved.service
+
+	if [[ ${ENABLED_UNITS[@]} ]]; then
+		systemctl --root="${ROOT:-/}" enable "${ENABLED_UNITS[@]}"
+	fi
+
+	if [[ -L ${EROOT}/var/lib/systemd/timesync ]]; then
+		rm "${EROOT}/var/lib/systemd/timesync"
+	fi
+
+	if [[ -z ${ROOT} && -d /run/systemd/system ]]; then
+		ebegin "Reexecuting system manager"
+		systemctl daemon-reexec
+		eend $?
+	fi
 
 	if [[ ${FAIL} ]]; then
 		eerror "One of the postinst commands failed. Please check the postinst output"

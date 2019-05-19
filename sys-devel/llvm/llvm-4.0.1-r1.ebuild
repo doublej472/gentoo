@@ -38,7 +38,12 @@ IUSE="debug doc gold libedit +libffi ncurses test
 
 RDEPEND="
 	sys-libs/zlib:0=
-	gold? ( >=sys-devel/binutils-2.22:*[cxx] )
+	gold? (
+		|| (
+			>=sys-devel/binutils-2.31.1-r4:*[plugins]
+			<sys-devel/binutils-2.31.1-r4:*[cxx]
+		)
+	)
 	libedit? ( dev-libs/libedit:0=[${MULTILIB_USEDEP}] )
 	libffi? ( >=virtual/libffi-3.0.13-r1:0=[${MULTILIB_USEDEP}] )
 	ncurses? ( >=sys-libs/ncurses-5.9-r3:0=[${MULTILIB_USEDEP}] )"
@@ -73,7 +78,7 @@ CMAKE_BUILD_TYPE=RelWithDebInfo
 src_prepare() {
 	# Fix llvm-config for shared linking and sane flags
 	# https://bugs.gentoo.org/show_bug.cgi?id=565358
-	eapply "${FILESDIR}"/9999/0007-llvm-config-Clean-up-exported-values-update-for-shar.patch
+	eapply "${FILESDIR}"/7.1.0/0007-llvm-config-Clean-up-exported-values-update-for-shar.patch
 
 	# Backport the fix for dlclose() causing option parser mess
 	# e.g. https://bugs.gentoo.org/617154

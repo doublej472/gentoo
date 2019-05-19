@@ -1,4 +1,4 @@
-# Copyright 1999-2018 Gentoo Foundation
+# Copyright 1999-2018 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI="6"
@@ -10,7 +10,8 @@ if [[ ${PV} == "9999" ]] ; then
 	inherit git-r3
 	MY_P="imagemagick-9999"
 else
-	MY_P=ImageMagick-$(ver_rs 3 '-')
+	MY_PV="$(ver_rs 3 '-')"
+	MY_P="ImageMagick-${MY_PV}"
 	SRC_URI="mirror://${PN}/${MY_P}.tar.xz"
 	KEYWORDS="~alpha ~amd64 ~arm ~arm64 ~hppa ~ia64 ~mips ~ppc ~ppc64 ~s390 ~sh ~sparc ~x86 ~ppc-aix ~amd64-fbsd ~x86-fbsd ~amd64-linux ~x86-linux ~ppc-macos ~x64-macos ~x86-macos ~sparc-solaris ~x64-solaris ~x86-solaris"
 fi
@@ -83,13 +84,6 @@ src_prepare() {
 		config/policy.xml || \
 		die "Failed to apply hardening of policy.xml"
 	einfo "policy.xml hardened"
-
-	# Install default (unrestricted) policy in $HOME for test suite #664238
-	local _im_local_config_home="${HOME}/.config/ImageMagick"
-	mkdir -p "${_im_local_config_home}" || \
-		die "Failed to create IM config dir in '${_im_local_config_home}'"
-	cp "${FILESDIR}"/policy.test.xml "${_im_local_config_home}/policy.xml" || \
-		die "Failed to install default blank policy.xml in '${_im_local_config_home}'"
 
 	elibtoolize # for Darwin modules
 
@@ -176,8 +170,27 @@ src_configure() {
 }
 
 src_test() {
-	LD_LIBRARY_PATH="${S}/coders/.libs:${S}/filters/.libs:${S}/Magick++/lib/.libs:${S}/magick/.libs:${S}/wand/.libs" \
-	emake check
+	# Install default (unrestricted) policy in $HOME for test suite #664238
+	local _im_local_config_home="${HOME}/.config/ImageMagick"
+	mkdir -p "${_im_local_config_home}" || \
+		die "Failed to create IM config dir in '${_im_local_config_home}'"
+	cp "${FILESDIR}"/policy.test.xml "${_im_local_config_home}/policy.xml" || \
+		die "Failed to install default blank policy.xml in '${_im_local_config_home}'"
+
+	local im_command= IM_COMMANDS=()
+	if [[ ${PV} == "9999" ]] ; then
+		IM_COMMANDS+=( "magick -version" ) # Show version we are using -- cannot verify because of live ebuild
+	else
+		IM_COMMANDS+=( "magick -version | grep -q -- \"${MY_PV}\"" ) # Verify that we are using version we just built
+	fi
+	IM_COMMANDS+=( "magick -list policy" ) # Verify that policy.xml is used
+	IM_COMMANDS+=( "emake check" ) # Run tests
+
+	for im_command in "${IM_COMMANDS[@]}"; do
+		eval "${S}"/magick.sh \
+			${im_command} || \
+			die "Failed to run \"${im_command}\""
+	done
 }
 
 src_install() {

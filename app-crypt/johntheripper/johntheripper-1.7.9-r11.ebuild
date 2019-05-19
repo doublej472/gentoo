@@ -1,4 +1,4 @@
-# Copyright 1999-2018 Gentoo Foundation
+# Copyright 1999-2018 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=7
@@ -11,10 +11,10 @@ MY_P="${MY_PN}-${PV}"
 JUMBO="jumbo-7"
 
 DESCRIPTION="fast password cracker"
-HOMEPAGE="http://www.openwall.com/john/"
+HOMEPAGE="https://www.openwall.com/john/"
 
-SRC_URI="http://www.openwall.com/john/g/${MY_P}.tar.bz2
-	!minimal? ( http://www.openwall.com/john/g/${MY_P}-${JUMBO}.diff.gz )"
+SRC_URI="https://www.openwall.com/john/g/${MY_P}.tar.bz2
+	!minimal? ( https://www.openwall.com/john/g/${MY_P}-${JUMBO}.diff.gz )"
 
 LICENSE="GPL-2"
 SLOT="0"
@@ -27,7 +27,8 @@ REQUIRED_USE="openmp? ( !minimal )
 	opencl? ( !minimal )
 	mozilla? ( !minimal )"
 
-RDEPEND="sys-libs/zlib
+RDEPEND="!app-crypt/johntheripper-jumbo
+	sys-libs/zlib
 	!minimal? (
 		!libressl? ( dev-libs/openssl:0= )
 		libressl? ( dev-libs/libressl:0= )
@@ -234,7 +235,7 @@ src_install() {
 	dosbin run/john
 	newsbin run/mailer john-mailer
 
-	pax-mark -mr "${ED}usr/sbin/john" || die
+	pax-mark -mr "${ED}/usr/sbin/john" || die
 
 	dosym john /usr/sbin/unafs
 	dosym john /usr/sbin/unique

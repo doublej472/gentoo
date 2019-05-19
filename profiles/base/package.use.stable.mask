@@ -1,14 +1,41 @@
-# Copyright 1999-2018 Gentoo Foundation
+# Copyright 1999-2019 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 # This file requires eapi 5 or later. New entries go on top.
 # Please use the same syntax as in package.use.mask
 
-# Andreas Sturmlechner <asturm@gentoo.org> (11 Sep 2018)
-# Sometimes crashes Plasma with Appstream versions pre-0.12.
-# Newer versions of dev-libs/appstream are not stable yet. See also:
-# https://mail.kde.org/pipermail/kde-distro-packagers/2018-September/000347.html
-kde-plasma/plasma-desktop appstream
+# Georgy Yakovlev <gyakovlev@gentoo.org> (10 May 2019)
+# needs llvm slots which are not stable #678908
+# also prone to weird compilation failures
+# masking this for now, will readjust as situation changes
+>=dev-lang/rust-1.34 system-llvm
+
+# Virgil Dupras <vdupras@gentoo.org> (10 May 2019)
+# Needs openssl 1.1 which isn't going stable for a while and blocks
+# bug #684972. See bug #685584
+>=app-text/mupdf-1.14.0-r3 ssl
+
+# Mart Raudsepp <leio@gentoo.org> (14 Apr 2019)
+# Needs media-plugins/gst-plugins-chromaprint, which is not stable
+# anywhere yet.
+media-plugins/grilo-plugins chromaprint
+
+# Andreas Sturmlechner <asturm@gentoo.org> (16 Feb 2019)
+# Unstable dependencies.
+media-gfx/digikam vkontakte
+media-plugins/kipi-plugins mediawiki vkontakte
+
+# Brian Evans <grknight@gentoo.org> (06 Dec 2018)
+# Mask USE flag since argon2 dependency is not stable on most arches
+dev-lang/php argon2
+
+# Mikle Kolyada <zlogene@gentoo.org> (07 Nov 2018)
+# sssd is only stable for amd64 and x86
+app-admin/sudo sssd
+
+# Andreas Sturmlechner <asturm@gentoo.org> (16 Oct 2018)
+# app-misc/ddcutil is not yet stable.
+kde-plasma/powerdevil brightness-control
 
 # Michał Górny <mgorny@gentoo.org> (07 Jun 2018)
 # sys-libs/netbsd-csu not stable yet.
@@ -26,13 +53,9 @@ media-video/vlc aom srt
 # Depends on lots of unstable dependencies
 dev-python/s3fs test
 
-# Andreas Sturmlechner <asturm@gentoo.org> (22 Apr 2018)
-# Huge patchset in 6.0, early crash reports with fix in ~arch KF5/Plasma-5
-=app-office/libreoffice-6.0* kde
-
 # Andreas Sturmlechner <asturm@gentoo.org> (03 Mar 2018)
-# Depends on unstable dependencies; qt3d bug #652046
-sci-geosciences/qgis 3d grass
+# sci-geosciences/grass is not stable
+sci-geosciences/qgis grass
 
 # Thomas Beierlein <tomjbe@gentoo.org> (21 Mar 2018)
 # ~app-backup/bacula-9.0.6 does not compile with USE=libressl (bug #641492)
@@ -41,11 +64,6 @@ sci-geosciences/qgis 3d grass
 # Matthias Maier <tamiko@gentoo.org> (18 Mar 2018)
 # dev-libs/capstone hasn't been stabilized yet
 app-emulation/qemu capstone
-
-# Zac Medico <zmedico@gentoo.org> (9 Mar 2018)
-# The rsync-verify support is not really stable yet.
-# Bugs #649276, #647964
-<sys-apps/portage-2.3.28 rsync-verify
 
 # Kent Fredric <kentnl@gentoo.org> (3 Mar 2018)
 # Not an officially supported configuration, as it causes unpredictable
@@ -93,10 +111,6 @@ sci-libs/gdal mdb
 # Unstable dependencies.
 dev-util/rpmdevtools emacs
 
-# Patrick McLean <chutzpah@gentoo.org> (11 Jul 2017)
-# Requires >=net-dns/libidn2-2.0 stabilization
-net-dns/dnsmasq libidn2
-
 # Andreas Sturmlechner <asturm@gentoo.org> (23 Mar 2017)
 # Requires dev-lang/julia stabilisation, bug #613576
 kde-apps/cantor julia
@@ -111,17 +125,9 @@ app-portage/layman g-sorcery
 # Bug: #581058
 net-misc/asterisk osplookup
 
-# Johannes Huber <johu@gentoo.org> (28 Jan 2017)
-# Unstable dependencies.
-media-plugins/kipi-plugins mediawiki vkontakte
-
 # Michael Palimaka <kensington@gentoo.org (26 Jan 2017)
 # Requires testing version of media-libs/opencv
 media-libs/mlt opencv
-
-# Matthias Maier <tamiko@gentoo.org> (22 Jan 2017)
-# sys-fs/zfs isn't going to be marked stable anytime soon
-app-emulation/libvirt zfs
 
 # Michael Palimaka <kensington@gentoo.org (18 Jan 2017)
 # www-client/weboob is horribly outdated and not stable
@@ -150,10 +156,6 @@ app-admin/packagekit-base entropy
 # on a vulnerable libgcrypt version is in tree
 dev-db/mariadb sst-xtrabackup
 dev-db/mariadb-galera sst-xtrabackup
-
-# William Hubbs <williamh@gentoo.org (13 Apr 2016)
-# Needs gcc-5 which is currently unstable
-dev-lang/go gccgo
 
 # Sergey Popov <pinkbyte@gentoo.org> (15 Feb 2016)
 # Mask monitoring capabilities of Ganeti on stable branches
@@ -201,14 +203,6 @@ media-libs/libcaca java mono
 # Alon Bar-Lev <alonbl@gentoo.org> (21 Jul 2014)
 # dev-libs/opencryptoki will not be stabile any time soon (bug#510204)
 app-crypt/tpm-tools pkcs11
-
-# Sergey Popov <pinkbyte@gentoo.org> (28 Oct 2013)
-# sys-cluster/cman is still in ~arch.
-sys-cluster/pacemaker cman
-
-# Samuli Suominen <ssuominen@gentoo.org> (01 Aug 2013)
-# The dependencies for these flags are still in ~arch.
-sys-fs/lvm2 clvm cman
 
 # Doug Goldstein <cardoe@gentoo.org> (12 Sep 2013)
 # Waiting on glusterfs maintainers in bug #484016

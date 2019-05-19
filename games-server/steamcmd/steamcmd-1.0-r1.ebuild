@@ -1,4 +1,4 @@
-# Copyright 1999-2018 Gentoo Foundation
+# Copyright 1999-2019 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI="7"
@@ -11,7 +11,7 @@ SRC_URI="https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz 
 
 LICENSE="LGPL-2.1+ Steam"
 SLOT="0"
-KEYWORDS="-* ~amd64 ~x86"
+KEYWORDS="-* amd64 ~x86"
 
 RDEPEND="app-misc/screen"
 
@@ -19,8 +19,10 @@ RESTRICT="bindist mirror"
 
 S="${WORKDIR}"
 
-QA_PREBUILT="opt/steamcmd/linux32/libstdc++.so.6
-	opt/steamcmd/linux32/steamcmd"
+QA_PREBUILT="
+	opt/steamcmd/linux32/libstdc++.so.6
+	opt/steamcmd/linux32/steamcmd
+"
 
 pkg_setup() {
 	enewgroup steamcmd

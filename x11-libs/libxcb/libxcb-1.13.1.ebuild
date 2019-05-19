@@ -1,9 +1,9 @@
-# Copyright 1999-2018 Gentoo Foundation
+# Copyright 1999-2019 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=5
 
-PYTHON_COMPAT=( python{2_7,3_4,3_5,3_6} )
+PYTHON_COMPAT=( python{2_7,3_5,3_6,3_7} )
 PYTHON_REQ_USE=xml
 
 XORG_DOC=doc
@@ -11,8 +11,7 @@ XORG_MULTILIB=yes
 inherit python-any-r1 xorg-2
 
 DESCRIPTION="X C-language Bindings library"
-HOMEPAGE="https://xcb.freedesktop.org/"
-EGIT_REPO_URI="https://anongit.freedesktop.org/git/xcb/libxcb.git"
+HOMEPAGE="https://xcb.freedesktop.org/ https://gitlab.freedesktop.org/xorg/lib/libxcb"
 [[ ${PV} != 9999* ]] && \
 	SRC_URI="https://xcb.freedesktop.org/dist/${P}.tar.bz2"
 

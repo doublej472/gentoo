@@ -21,23 +21,21 @@ fi
 
 LICENSE="GPL-3+"
 SLOT="0"
-IUSE="+avahi +client +flac +server static-libs tremor +vorbis"
+IUSE="+client +flac +server static-libs tremor +vorbis +zeroconf"
 
 REQUIRED_USE="|| ( server client )"
 
-RDEPEND="avahi? ( net-dns/avahi[dbus] )
-	client? ( media-libs/alsa-lib )
+RDEPEND="client? ( media-libs/alsa-lib )
 	flac? ( media-libs/flac )
 	tremor? ( media-libs/tremor )
-	vorbis? ( media-libs/libvorbis )"
+	vorbis? ( media-libs/libvorbis )
+	zeroconf? ( net-dns/avahi[dbus] )"
 DEPEND="${RDEPEND}
 	>=dev-cpp/aixlog-1.2.1
 	>=dev-cpp/asio-1.12.1
 	>=dev-cpp/popl-1.2.0"
 
-PATCHES=( "${FILESDIR}/${PN}-options-for-use-flags.patch" )
-
-pkg_preinst() {
+pkg_setup() {
 	if use server ; then
 		enewgroup "snapserver"
 		enewuser "snapserver" -1 -1 /var/lib/snapserver snapserver
@@ -50,7 +48,6 @@ pkg_preinst() {
 
 src_configure() {
 	local mycmakeargs=(
-		-DBUILD_WITH_AVAHI=$(usex avahi)
 		-DBUILD_CLIENT=$(usex client)
 		-DBUILD_WITH_FLAC=$(usex flac)
 		-DBUILD_SERVER=$(usex server)
@@ -58,6 +55,7 @@ src_configure() {
 		-DBUILD_TESTS=no
 		-DBUILD_WITH_TREMOR=$(usex tremor)
 		-DBUILD_WITH_VORBIS=$(usex vorbis)
+		-DBUILD_WITH_AVAHI=$(usex zeroconf)
 	)
 
 	cmake-utils_src_configure
@@ -76,12 +74,14 @@ src_install() {
 	done
 
 	if use client ; then
-		diropts -m 0770 -o snapclient audio
 		keepdir /var/lib/snapclient
+		fowners snapclient:audio /var/lib/snapclient
+		fperms 0770 /var/lib/snapclient
 	fi
 
 	if use server ; then
-		diropts -m 0770 -o snapserver snapserver
 		keepdir /var/lib/snapserver
+		fowners snapserver:snapserver /var/lib/snapserver
+		fperms 0770 /var/lib/snapserver
 	fi
 }

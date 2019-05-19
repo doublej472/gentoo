@@ -1,4 +1,4 @@
-# Copyright 1999-2017 Gentoo Foundation
+# Copyright 1999-2018 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 # PPC Specific use flags
@@ -22,7 +22,6 @@ mongodb
 
 # David Seifert <soap@gentoo.org> (08 Jul 2017)
 # Games are not keyworded anymore on ppc
-capslib
 fortune
 nagios-game
 physfs
@@ -124,9 +123,6 @@ lcd_devices_stv5730
 # Both
 lcd_devices_t6963
 
-# dev-lang/orc doesn't play nice
-schroedinger
-
 # This will need >=media-libs/libgpod-0.8.0 keyworded and stabilized on both ppc/ppc64, bugs 313691 and 325839
 ipod
 ios
@@ -147,11 +143,6 @@ nvtt
 
 # fdk-aac is already keyworded here
 -fdk
-
-# Samuli Suominen <ssuominen@gentoo.org> (18 Jan 2013)
-# libdlm and cman are not keyworded
-cman
-clvm
 
 # Pacho Ramos <pacho@gentoo.org> (08 Jan 2014)
 # Unmask systemd since it is keyworded here.

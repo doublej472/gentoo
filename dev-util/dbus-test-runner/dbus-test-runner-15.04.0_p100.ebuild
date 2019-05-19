@@ -1,9 +1,9 @@
-# Copyright 1999-2018 Gentoo Foundation
+# Copyright 1999-2019 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=6
 
-PYTHON_COMPAT=( python{3_4,3_5,3_6} )
+PYTHON_COMPAT=( python{3_5,3_6} )
 inherit flag-o-matic python-single-r1
 
 DESCRIPTION="Run executables under a new DBus session for testing"
@@ -21,9 +21,9 @@ RDEPEND="${PYTHON_DEPS}
 	>=dev-libs/glib-2.34:2
 	dev-python/dbusmock[${PYTHON_USEDEP}]
 "
-DEPEND="
-	${RDEPEND}
+DEPEND="${RDEPEND}
 	app-arch/xz-utils
+	dev-util/gdbus-codegen
 	dev-util/intltool
 "
 # now optional:

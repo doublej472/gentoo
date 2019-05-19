@@ -1,9 +1,9 @@
-# Copyright 1999-2018 Gentoo Foundation
+# Copyright 1999-2019 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=6
 
-PYTHON_COMPAT=( python2_7 python3_{4,5,6} )
+PYTHON_COMPAT=( python2_7 python3_{5,6} )
 
 inherit distutils-r1 bash-completion-r1
 
@@ -52,8 +52,8 @@ DEPEND="
 		>=dev-python/sphinx_celery-1.3[${PYTHON_USEDEP}]
 		dev-python/jinja[${PYTHON_USEDEP}]
 		dev-python/sqlalchemy[${PYTHON_USEDEP}]
-		$(python_gen_cond_dep 'dev-python/typing[${PYTHON_USEDEP}]' python2_7 python3_4)
-		)"
+		$(python_gen_cond_dep 'dev-python/typing[${PYTHON_USEDEP}]' python2_7)
+	)"
 
 # testsuite needs it own source
 DISTUTILS_IN_SOURCE_BUILD=1
@@ -95,7 +95,6 @@ pkg_postinst() {
 	optfeature "eventlet support" dev-python/eventlet
 	#optfeature "couchbase support" dev-python/couchbase
 	optfeature "redis support" dev-db/redis dev-python/redis-py
-	optfeature "couchdb support" dev-db/couchdb dev-python/couchdb-python
 	optfeature "gevent support" dev-python/gevent
 	optfeature "auth support" dev-python/pyopenssl
 	optfeature "pyro support" dev-python/pyro:4

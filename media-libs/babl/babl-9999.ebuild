@@ -1,9 +1,7 @@
-# Copyright 1999-2018 Gentoo Foundation
+# Copyright 1999-2019 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
-EAPI=6
-
-inherit ltprune
+EAPI=7
 
 if [[ ${PV} == *9999* ]]; then
 	inherit autotools git-r3
@@ -52,5 +50,5 @@ src_configure() {
 
 src_install() {
 	default
-	prune_libtool_files --all
+	find "${D}" -name '*.la' -type f -delete || die
 }

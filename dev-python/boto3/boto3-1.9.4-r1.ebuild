@@ -1,8 +1,8 @@
-# Copyright 1999-2018 Gentoo Foundation
+# Copyright 1999-2019 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=6
-PYTHON_COMPAT=( python2_7 python3_4 python3_5 python3_6 python3_7 )
+PYTHON_COMPAT=( python2_7 python3_5 python3_6 python3_7 )
 
 inherit distutils-r1 vcs-snapshot
 
@@ -17,7 +17,7 @@ if [[ "${PV}" == "9999" ]]; then
 	inherit git-r3
 else
 	SRC_URI="https://github.com/boto/${PN}/archive/${PV}.tar.gz -> ${P}.tar.gz"
-	KEYWORDS="~amd64 ~arm64 ~x86 ~amd64-linux ~x86-linux"
+	KEYWORDS="amd64 ~arm64 x86 ~amd64-linux ~x86-linux"
 fi
 
 RDEPEND="

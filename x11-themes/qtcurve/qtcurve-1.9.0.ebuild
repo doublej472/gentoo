@@ -1,4 +1,4 @@
-# Copyright 1999-2018 Gentoo Foundation
+# Copyright 1999-2018 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=6
@@ -16,7 +16,7 @@ IUSE="+X gtk nls plasma +qt5 test"
 
 if [[ "${PV}" != 9999 ]] ; then
 	SRC_URI="https://github.com/KDE/qtcurve/archive/v${PV/_/-}.tar.gz -> ${P}.tar.gz"
-	KEYWORDS="~alpha ~amd64 ~hppa ~ppc ~ppc64 ~sparc ~x86"
+	KEYWORDS="alpha amd64 ~hppa ppc ppc64 ~sparc x86"
 	S="${WORKDIR}/${P/_/-}"
 fi
 
@@ -49,7 +49,7 @@ COMMON_DEPEND="
 		$(add_qt_dep qtgui)
 		$(add_qt_dep qtsvg)
 		$(add_qt_dep qtwidgets)
-		$(add_qt_dep qtx11extras)
+		X? ( $(add_qt_dep qtx11extras) )
 	)
 	X? (
 		x11-libs/libX11
@@ -64,10 +64,13 @@ RDEPEND="${COMMON_DEPEND}
 	!x11-themes/gtk-engines-qtcurve
 "
 
+RESTRICT+=" test"
+
 DOCS=( AUTHORS ChangeLog.md README.md TODO.md )
 
 PATCHES=(
 	"${FILESDIR}/${PN}-1.9.0-build_testing.patch"
+	"${FILESDIR}/${PN}-1.9.0-no-X-buildfix.patch"
 )
 
 src_configure() {

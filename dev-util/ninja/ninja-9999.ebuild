@@ -1,9 +1,9 @@
-# Copyright 1999-2018 Gentoo Foundation
+# Copyright 2012-2019 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=7
 
-PYTHON_COMPAT=( python{2_7,3_4,3_5,3_6} )
+PYTHON_COMPAT=( python{2_7,3_5,3_6,3_7} )
 
 inherit bash-completion-r1 elisp-common python-any-r1 toolchain-funcs
 
@@ -11,7 +11,10 @@ if [[ ${PV} == 9999 ]]; then
 	inherit git-r3
 	EGIT_REPO_URI="https://github.com/ninja-build/ninja.git"
 else
-	SRC_URI="https://github.com/ninja-build/${PN}/archive/v${PV}.tar.gz -> ${P}.tar.gz"
+	KITWARE_VERSION="1.9.0.g99df1.kitware.dyndep-1.jobserver-1"
+	MY_P="ninja-${KITWARE_VERSION}"
+	S="${WORKDIR}/${MY_P}"
+	SRC_URI="https://github.com/Kitware/ninja/archive/v${KITWARE_VERSION}.tar.gz -> ${MY_P}.tar.gz"
 	KEYWORDS="~alpha ~amd64 ~arm ~arm64 ~hppa ~ia64 ~m68k ~mips ~ppc ~ppc64 ~s390 ~sh ~sparc ~x86 ~amd64-fbsd ~x86-fbsd ~amd64-linux ~x86-linux ~ppc-macos ~x64-macos ~x86-macos ~x64-solaris"
 fi
 
@@ -21,7 +24,7 @@ HOMEPAGE="https://ninja-build.org/"
 LICENSE="Apache-2.0"
 SLOT="0"
 
-IUSE="doc emacs test vim-syntax zsh-completion"
+IUSE="doc emacs test vim-syntax"
 
 BDEPEND="
 	${PYTHON_DEPS}
@@ -41,16 +44,17 @@ RDEPEND="
 			app-editors/gvim
 		)
 	)
-	zsh-completion? ( app-shells/zsh )
-	!<net-irc/ninja-1.5.9_pre14-r1" #436804
+"
 
 run_for_build() {
 	if tc-is-cross-compiler; then
 		local -x AR=$(tc-getBUILD_AR)
 		local -x CXX=$(tc-getBUILD_CXX)
-		local -x CFLAGS=${BUILD_CXXFLAGS}
+		local -x CFLAGS=
+		local -x CXXFLAGS=${BUILD_CXXFLAGS}
 		local -x LDFLAGS=${BUILD_LDFLAGS}
 	fi
+	echo "$@" >&2
 	"$@"
 }
 
@@ -60,7 +64,7 @@ src_compile() {
 	# configure.py uses CFLAGS instead of CXXFLAGS
 	export CFLAGS=${CXXFLAGS}
 
-	run_for_build "${PYTHON}" configure.py --bootstrap --verbose || die
+	run_for_build ${EPYTHON} configure.py --bootstrap --verbose || die
 
 	if tc-is-cross-compiler; then
 		mv ninja ninja-build || die
@@ -83,7 +87,7 @@ src_test() {
 	if ! tc-is-cross-compiler; then
 		# Bug 485772
 		ulimit -n 2048
-		./ninja-build -v ninja_test || die
+		./ninja -v ninja_test || die
 		./ninja_test || die
 	fi
 }
@@ -108,10 +112,8 @@ src_install() {
 		doins "${T}/ninja.vim"
 	fi
 
-	if use zsh-completion; then
-		insinto /usr/share/zsh/site-functions
-		newins misc/zsh-completion _ninja
-	fi
+	insinto /usr/share/zsh/site-functions
+	newins misc/zsh-completion _ninja
 
 	if use emacs; then
 		cd misc || die

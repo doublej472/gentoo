@@ -1,4 +1,4 @@
-# Copyright 1999-2018 Gentoo Foundation
+# Copyright 1999-2019 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI="5"
@@ -16,7 +16,7 @@ fi
 inherit flag-o-matic linux-info linux-mod autotools-utils
 
 DESCRIPTION="The Solaris Porting Layer provides many of the Solaris kernel APIs"
-HOMEPAGE="http://zfsonlinux.org/"
+HOMEPAGE="https://zfsonlinux.org/"
 
 LICENSE="GPL-2"
 SLOT="0"
@@ -45,6 +45,7 @@ pkg_setup() {
 		KALLSYMS
 		MODULES
 		!PAX_KERNEXEC_PLUGIN_METHOD_OR
+		!TRIM_UNUSED_KSYMS
 		ZLIB_DEFLATE
 		ZLIB_INFLATE
 	"

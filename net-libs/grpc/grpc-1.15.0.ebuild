@@ -1,9 +1,9 @@
-# Copyright 1999-2018 Gentoo Foundation
+# Copyright 1999-2019 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=6
 
-PYTHON_COMPAT=( python2_7 python3_{4,5,6} )
+PYTHON_COMPAT=( python2_7 python3_{5,6} )
 DISTUTILS_OPTIONAL=1
 
 inherit distutils-r1 flag-o-matic toolchain-funcs
@@ -14,7 +14,7 @@ inherit distutils-r1 flag-o-matic toolchain-funcs
 PROTOBUF_VERSION="3.6.1"
 
 DESCRIPTION="Modern open source high performance RPC framework"
-HOMEPAGE="http://www.grpc.io"
+HOMEPAGE="https://www.grpc.io"
 SRC_URI="
 	https://github.com/${PN}/${PN}/archive/v${PV}.tar.gz -> ${P}.tar.gz
 	tools? ( https://github.com/google/protobuf/archive/v${PROTOBUF_VERSION}.tar.gz -> protobuf-${PROTOBUF_VERSION}.tar.gz )
@@ -137,7 +137,7 @@ python_compile_all() {
 
 src_install() {
 	emake \
-		prefix="${D}"/usr \
+		prefix="${ED%/}"/usr \
 		INSTALL_LIBDIR="$(get_libdir)" \
 		STRIP=/bin/true \
 		install

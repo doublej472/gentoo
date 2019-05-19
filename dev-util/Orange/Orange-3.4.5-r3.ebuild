@@ -1,9 +1,9 @@
-# Copyright 1999-2018 Gentoo Foundation
+# Copyright 1999-2019 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI="6"
 
-PYTHON_COMPAT=( python3_{4,5,6} )
+PYTHON_COMPAT=( python3_{5,6} )
 
 inherit distutils-r1
 
@@ -19,7 +19,8 @@ IUSE=""
 RDEPEND="
 	dev-python/anyqt[${PYTHON_USEDEP}]
 	>=dev-python/bottleneck-1.0.0[${PYTHON_USEDEP}]
-	>=dev-python/CommonMark-0.5.5[${PYTHON_USEDEP}]
+	<dev-python/commonmark-0.8[${PYTHON_USEDEP}]
+	>=dev-python/commonmark-0.5.5[${PYTHON_USEDEP}]
 	dev-python/dill[${PYTHON_USEDEP}]
 	>=dev-python/chardet-2.3.0[${PYTHON_USEDEP}]
 	>=dev-python/joblib-0.9.4[${PYTHON_USEDEP}]

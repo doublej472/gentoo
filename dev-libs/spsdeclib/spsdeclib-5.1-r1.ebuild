@@ -1,15 +1,15 @@
-# Copyright 1999-2018 Gentoo Foundation
+# Copyright 1999-2019 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
-EAPI=7
+EAPI="7"
 
-inherit autotools eutils
+inherit autotools
 
 DESCRIPTION="Kryoflux SPS Decoder Library"
 HOMEPAGE="https://www.kryoflux.com/"
 SRC_URI="https://www.kryoflux.com/download/${PN}_${PV}_source.zip"
 
-KEYWORDS="~amd64 ~x86"
+KEYWORDS="amd64 ~x86"
 LICENSE="Kryoflux-MAME"
 SLOT="0"
 
@@ -17,7 +17,7 @@ DEPEND="app-arch/unzip"
 
 S="${WORKDIR}/capsimg_source_linux_macosx/CAPSImg"
 
-DOCS=( "${WORKDIR}/DONATIONS.txt" "${WORKDIR}/HISTORY.txt" "${WORKDIR}/RELEASE.txt" )
+DOCS=( "${WORKDIR}"/{DONATIONS,HISTORY,RELEASE}.txt )
 
 PATCHES=( "${FILESDIR}"/add_symlink.patch )
 

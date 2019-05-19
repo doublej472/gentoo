@@ -1,9 +1,9 @@
-# Copyright 1999-2018 Gentoo Foundation
+# Copyright 1999-2019 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=6
 
-PYTHON_COMPAT=( python{2_7,3_4,3_5,3_6} )
+PYTHON_COMPAT=( python{2_7,3_5,3_6,3_7} )
 inherit git-r3 python-r1
 
 DESCRIPTION="Python bindings for sys-devel/clang"
@@ -29,12 +29,6 @@ RDEPEND="
 DEPEND="${RDEPEND}"
 
 S=${WORKDIR}/${P}/bindings/python
-
-PATCHES=(
-	# update completion test results due to completion changes
-	# https://reviews.llvm.org/D50171
-	"${FILESDIR}"/9999/0001-python-tests-Update-test_code_completion.patch
-)
 
 src_unpack() {
 	git-r3_fetch

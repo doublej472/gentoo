@@ -1,8 +1,8 @@
-# Copyright 1999-2018 Gentoo Foundation
+# Copyright 1999-2019 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=6
-USE_RUBY="ruby23 ruby24 ruby25"
+USE_RUBY="ruby23 ruby24 ruby25 ruby26"
 
 RUBY_FAKEGEM_EXTRADOC="History.md README.md"
 
@@ -20,7 +20,7 @@ KEYWORDS="~amd64 ~arm ~arm64 ~hppa ~x86"
 SLOT="3"
 IUSE="test"
 
-DEPEND="${DEPEND} test? ( www-client/firefox )"
+DEPEND="${DEPEND} test? ( || ( www-client/firefox www-client/firefox-bin ) )"
 
 ruby_add_bdepend "test? ( dev-ruby/rspec:3 dev-ruby/launchy >=dev-ruby/selenium-webdriver-2.0 dev-ruby/sinatra )"
 

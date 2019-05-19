@@ -1,18 +1,18 @@
-# Copyright 1999-2018 Gentoo Foundation
+# Copyright 1999-2019 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=6
 
 WX_GTK_VER="3.0"
-PYTHON_COMPAT=( python{2_7,3_4,3_5,3_6} )
+PYTHON_COMPAT=( python{2_7,3_5,3_6} )
 
-inherit python-single-r1 wxwidgets versionator cmake-utils
+inherit python-single-r1 wxwidgets cmake-utils eapi7-ver
 
 DESCRIPTION="GUI for the creation & processing of panoramic images"
 HOMEPAGE="http://hugin.sf.net"
 SRC_URI="mirror://sourceforge/${PN}/${P/_/}.tar.bz2"
 
-LICENSE="GPL-2 SIFT"
+LICENSE="GPL-2+ BSD BSD-2 MIT wxWinLL-3 ZLIB FDL-1.2"
 SLOT="0"
 KEYWORDS="amd64 x86"
 
@@ -55,7 +55,9 @@ REQUIRED_USE="python? ( ${PYTHON_REQUIRED_USE} )"
 
 DOCS=( authors.txt README TODO )
 
-S=${WORKDIR}/${PN}-$(get_version_component_range 1-2).0
+PATCHES=( "${FILESDIR}/${P}-exiv2-0.27.patch" )
+
+S=${WORKDIR}/${PN}-$(ver_cut 1-2).0
 
 pkg_setup() {
 	use python && python-single-r1_pkg_setup

@@ -1,4 +1,4 @@
-# Copyright 1999-2018 Gentoo Authors
+# Copyright 1999-2019 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=6
@@ -17,7 +17,7 @@ SLOT="0"
 RESTRICT="test"
 
 RDEPEND=""
-DEPEND=">=dev-util/spirv-headers-1.3.4_pre20180917"
+DEPEND=">=dev-util/spirv-headers-1.3.4_pre20190302"
 
 multilib_src_configure() {
 	local mycmakeargs=(
@@ -29,7 +29,7 @@ multilib_src_configure() {
 }
 
 multilib_src_install() {
-	default
+	cmake-utils_src_install
 
 	# create a header file with the commit hash of the current revision
 	# vulkan-tools needs this to build

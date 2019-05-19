@@ -1,4 +1,4 @@
-# Copyright 1999-2018 Gentoo Authors
+# Copyright 1999-2019 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=7
@@ -12,7 +12,7 @@ SRC_URI="https://github.com/mongodb/mongo-tools/archive/r${MY_PV}.tar.gz -> mong
 
 LICENSE="Apache-2.0"
 SLOT="0"
-KEYWORDS="~amd64"
+KEYWORDS="amd64"
 IUSE="sasl ssl"
 
 RDEPEND="!<dev-db/mongodb-3.0.0"
@@ -40,6 +40,9 @@ src_prepare() {
 	if ! use ppc64; then
 		sed -i 's/\(go build\)/\1 -buildmode=pie/g' build.sh || die
 	fi
+
+	# allow building with go 1.12 #678924
+	sed -i 's/_Ctype_struct_/C.struct_/' vendor/src/github.com/google/gopacket/pcap/pcap.go || die
 }
 
 src_compile() {

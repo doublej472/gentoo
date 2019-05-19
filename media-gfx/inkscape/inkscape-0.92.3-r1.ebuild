@@ -1,30 +1,30 @@
-# Copyright 1999-2018 Gentoo Foundation
+# Copyright 1999-2019 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=6
+
 PYTHON_COMPAT=( python2_7 )
 PYTHON_REQ_USE="xml"
-
 inherit autotools flag-o-matic gnome2-utils xdg toolchain-funcs python-single-r1
 
 MY_P="${P/_/}"
 
-DESCRIPTION="A SVG based generic vector-drawing program"
+DESCRIPTION="SVG based generic vector-drawing program"
 HOMEPAGE="https://inkscape.org/"
-SRC_URI="https://inkscape.global.ssl.fastly.net/media/resources/file/${P}.tar.bz2"
+SRC_URI="https://inkscape.global.ssl.fastly.net/media/resources/file/${P}.tar.bz2
+	https://dev.gentoo.org/~asturm/distfiles/${P}-poppler-patches-1.tar.xz"
 
 LICENSE="GPL-2 LGPL-2.1"
 SLOT="0"
-KEYWORDS="~amd64 ~arm ~hppa ~ppc ~ppc64 ~x86"
+KEYWORDS="amd64 ~arm ~hppa ppc ppc64 x86"
 IUSE="cdr dia dbus exif gnome imagemagick openmp postscript inkjar jpeg latex"
 IUSE+=" lcms nls spell static-libs visio wpg"
 
 REQUIRED_USE="${PYTHON_REQUIRED_USE}"
 
-COMMON_DEPEND="
-	${PYTHON_DEPS}
+COMMON_DEPEND="${PYTHON_DEPS}
 	>=app-text/poppler-0.26.0:=[cairo]
-	>=dev-cpp/glibmm-2.48
+	>=dev-cpp/glibmm-2.54.1
 	>=dev-cpp/gtkmm-2.18.0:2.4
 	>=dev-cpp/cairomm-1.9.8
 	>=dev-libs/boehm-gc-7.1:=
@@ -44,9 +44,9 @@ COMMON_DEPEND="
 	>=x11-libs/gtk+-2.10.7:2
 	>=x11-libs/pango-1.24
 	cdr? (
-		media-libs/libcdr
 		app-text/libwpg:0.3
 		dev-libs/librevenge
+		media-libs/libcdr
 	)
 	dbus? ( dev-libs/dbus-glib )
 	exif? ( media-libs/libexif )
@@ -59,16 +59,15 @@ COMMON_DEPEND="
 		app-text/gtkspell:2
 	)
 	visio? (
-		media-libs/libvisio
 		app-text/libwpg:0.3
 		dev-libs/librevenge
+		media-libs/libvisio
 	)
 	wpg? (
 		app-text/libwpg:0.3
 		dev-libs/librevenge
 	)
 "
-
 # These only use executables provided by these packages
 # See share/extensions for more details. inkscape can tell you to
 # install these so we could of course just not depend on those and rely
@@ -84,9 +83,9 @@ RDEPEND="${COMMON_DEPEND}
 	)
 	postscript? ( app-text/ghostscript-gpl )
 "
-
 DEPEND="${COMMON_DEPEND}
 	>=dev-libs/boost-1.36
+	dev-util/glib-utils
 	>=dev-util/intltool-0.40
 	>=sys-devel/gettext-0.17
 	virtual/pkgconfig
@@ -100,9 +99,12 @@ PATCHES=(
 	"${FILESDIR}/${PN}-0.91_pre3-sk-man.patch"
 	"${FILESDIR}/${PN}-0.48.4-epython.patch"
 	"${FILESDIR}/${PN}-0.92.3-freetype_pkgconfig.patch"
-	"${FILESDIR}/${PN}-0.92.3-poppler-0.64.patch"
-	"${FILESDIR}/${PN}-0.92.3-poppler-0.65.patch"
-	"${FILESDIR}/${PN}-0.92.3-poppler-0.64-2.patch"
+	"${WORKDIR}/${PN}-0.92.3-poppler-0.64.patch"
+	"${WORKDIR}/${PN}-0.92.3-poppler-0.65.patch"
+	"${WORKDIR}/${PN}-0.92.3-poppler-0.64-2.patch"
+	"${WORKDIR}/${PN}-0.92.3-poppler-0.69.patch"
+	"${WORKDIR}/${PN}-0.92.3-poppler-0.71.patch"
+	"${WORKDIR}/${PN}-0.92.3-poppler-0.72.patch"
 )
 
 S="${WORKDIR}/${MY_P}"
@@ -161,10 +163,6 @@ src_install() {
 
 	find "${ED}" -name "*.la" -delete || die
 	python_optimize "${ED%/}"/usr/share/${PN}/extensions
-}
-
-pkg_preinst() {
-	gnome2_icon_savelist
 }
 
 pkg_postinst() {

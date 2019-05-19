@@ -1,21 +1,29 @@
-# Copyright 1999-2018 Gentoo Foundation
+# Copyright 1999-2019 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
-EAPI=6
+EAPI=7
 
 inherit qmake-utils systemd user readme.gentoo-r1
 
 DESCRIPTION="Mumble is an open source, low-latency, high quality voice chat software"
 HOMEPAGE="https://wiki.mumble.info"
-if [[ "${PV}" = 9999 ]] ; then
+if [[ "${PV}" == 9999 ]] ; then
 	inherit git-r3
 	EGIT_REPO_URI="https://github.com/mumble-voip/mumble.git"
 	EGIT_SUBMODULES=( '-*' )
 else
-	MY_P="mumble-${PV/_/~}"
-	SRC_URI="https://mumble.info/snapshot/${MY_P}.tar.gz"
+	MY_PN="mumble"
+	if [[ "${PV}" == *_pre* ]] ; then
+		MY_P="${MY_PN}-${PV}"
+		SRC_URI="https://dev.gentoo.org/~polynomial-c/dist/${MY_P}.tar.xz"
+		S="${WORKDIR}/${MY_P}"
+	else
+		MY_PV="${PV/_/-}"
+		MY_P="${MY_PN}-${MY_PV}"
+		SRC_URI="https://github.com/mumble-voip/mumble/releases/download/${MY_PV}/${MY_P}.tar.gz"
+		S="${WORKDIR}/${MY_PN}-${PV/_*}"
+	fi
 	KEYWORDS="~amd64 ~arm ~x86"
-	S="${WORKDIR}/${MY_P}"
 fi
 
 LICENSE="BSD"
@@ -41,6 +49,8 @@ RDEPEND="
 
 DEPEND="${RDEPEND}
 	>=dev-libs/boost-1.41.0
+"
+BDEPEND="
 	virtual/pkgconfig"
 
 DOC_CONTENTS="
@@ -114,12 +124,8 @@ src_install() {
 	newinitd "${FILESDIR}"/murmur.initd-r1 murmur
 	newconfd "${FILESDIR}"/murmur.confd murmur
 
-	if use dbus; then
-		systemd_newunit "${FILESDIR}"/murmurd-dbus.service "${PN}".service
-		systemd_newtmpfilesd "${FILESDIR}"/murmurd-dbus.tmpfiles "${PN}".conf
-	else
-		systemd_newunit "${FILESDIR}"/murmurd-no-dbus.service "${PN}".service
-	fi
+	systemd_dounit scripts/${PN}.service
+	systemd_newtmpfilesd "${FILESDIR}"/murmurd-dbus.tmpfiles "${PN}".conf
 
 	keepdir /var/lib/murmur /var/log/murmur
 	fowners -R murmur /var/lib/murmur /var/log/murmur

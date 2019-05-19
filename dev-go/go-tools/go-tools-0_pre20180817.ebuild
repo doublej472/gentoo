@@ -1,4 +1,4 @@
-# Copyright 1999-2018 Gentoo Foundation
+# Copyright 1999-2019 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=6
@@ -14,16 +14,18 @@ inherit golang-build golang-vcs-snapshot
 
 DESCRIPTION="Go Tools"
 HOMEPAGE="https://godoc.org/golang.org/x/tools"
+GO_FAVICON="go-favicon-20181103162401.ico"
 SRC_URI="${ARCHIVE_URI}
 	${EGO_VENDOR_URI}
-	http://golang.org/favicon.ico -> go-favicon.ico"
+	mirror://gentoo/${GO_FAVICON}
+	https://dev.gentoo.org/~zmedico/distfiles/${GO_FAVICON}"
 LICENSE="BSD"
 SLOT="0/${PVR}"
 
 src_prepare() {
 	default
 	# Add favicon to the godoc web interface (bug 551030)
-	cp "${DISTDIR}"/go-favicon.ico "src/${EGO_PN}/godoc/static/favicon.ico" ||
+	cp "${DISTDIR}"/${GO_FAVICON} "src/${EGO_PN}/godoc/static/favicon.ico" ||
 		die
 	sed -e 's:"example.html",:\0\n\t"favicon.ico",:' \
 		-i src/${EGO_PN}/godoc/static/gen.go || die
@@ -45,6 +47,7 @@ src_prepare() {
 }
 
 src_compile() {
+	export -n GOCACHE XDG_CACHE_HOME #678964
 	# Generate static.go with favicon included
 	pushd src/golang.org/x/tools/godoc/static >/dev/null || die
 	GOPATH="${S}:$(get_golibdir_gopath)" \

@@ -1,4 +1,4 @@
-# Copyright 1999-2018 Gentoo Foundation
+# Copyright 1999-2019 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=6
@@ -6,7 +6,7 @@ EAPI=6
 COMMIT=72cfbd7664f21fcc0e62b869a6b01bf73eb5e7da
 CMAKE_MAKEFILE_GENERATOR="ninja"
 PYTHON_COMPAT=( python2_7 )
-USE_RUBY="ruby23 ruby24 ruby25"
+USE_RUBY="ruby23 ruby24 ruby25 ruby26"
 
 inherit check-reqs cmake-utils flag-o-matic python-any-r1 qmake-utils ruby-single toolchain-funcs
 
@@ -16,7 +16,7 @@ SRC_URI="mirror://gentoo/${P}.tar.gz"
 
 LICENSE="BSD LGPL-2+"
 SLOT="5/5.212"
-KEYWORDS="amd64 ~arm ~arm64 ~ppc ppc64 x86"
+KEYWORDS="amd64 arm ~arm64 ~ppc ppc64 x86"
 IUSE="geolocation gles2 +gstreamer +hyphen +jit multimedia nsplugin opengl orientation +printsupport qml webp X"
 
 REQUIRED_USE="
@@ -76,7 +76,12 @@ DEPEND="${RDEPEND}
 
 S=${WORKDIR}/${COMMIT}
 
-PATCHES=( "${FILESDIR}/${P}-functional.patch" )
+PATCHES=(
+	"${FILESDIR}/${P}-functional.patch"
+	"${FILESDIR}/${P}-fix-pkgconfig.patch"
+	"${FILESDIR}/${P}-cmake-fix-pkgconfig_deps-spelling.patch"
+	"${FILESDIR}/${P}-js-build-error.patch"
+)
 
 CHECKREQS_DISK_BUILD="16G" # bug 417307
 
@@ -109,6 +114,7 @@ src_configure() {
 		-DENABLE_TOOLS=OFF
 		-DENABLE_GEOLOCATION=$(usex geolocation)
 		-DUSE_GSTREAMER=$(usex gstreamer)
+		-DUSE_LIBHYPHEN=$(usex hyphen)
 		-DENABLE_JIT=$(usex jit)
 		-DUSE_QT_MULTIMEDIA=$(usex multimedia)
 		-DENABLE_NETSCAPE_PLUGIN_API=$(usex nsplugin)
@@ -120,7 +126,9 @@ src_configure() {
 		-DENABLE_X11_TARGET=$(usex X)
 	)
 
-	if has_version "virtual/rubygems[ruby_targets_ruby25]"; then
+	if has_version "virtual/rubygems[ruby_targets_ruby26]"; then
+		mycmakeargs+=( -DRUBY_EXECUTABLE=$(type -P ruby26) )
+	elif has_version "virtual/rubygems[ruby_targets_ruby25]"; then
 		mycmakeargs+=( -DRUBY_EXECUTABLE=$(type -P ruby25) )
 	elif has_version "virtual/rubygems[ruby_targets_ruby24]"; then
 		mycmakeargs+=( -DRUBY_EXECUTABLE=$(type -P ruby24) )
